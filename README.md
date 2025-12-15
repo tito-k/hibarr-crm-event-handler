@@ -98,6 +98,18 @@ When a deal reaches "Committed" status:
 
 ## API Endpoints
 
+### Postman Collection
+
+For easy API testing, a complete Postman collection is available:
+
+📘 **[View Postman Documentation](https://documenter.getpostman.com/view/13203401/2sB3dTtU4d)**
+
+The collection includes:
+- Pre-configured webhook requests
+- Sample payloads for different deal statuses
+- Environment variables setup
+- Example responses
+
 ### Webhook Endpoint
 ```
 POST /api/v1/webhook/:provider
