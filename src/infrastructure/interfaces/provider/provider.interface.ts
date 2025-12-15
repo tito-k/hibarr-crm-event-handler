@@ -2,8 +2,6 @@ import { Request } from 'express';
 import { IWebhookReceiptAttribute } from '../webhook-receipt.interface';
 
 export enum Provider {
-  EXACT_ONLINE = 'exact-online',
-  WOOCOMMERCE = 'woocommerce',
   CRM = 'crm',
   META_CAPI = 'meta-capi',
   BREVO = 'brevo',

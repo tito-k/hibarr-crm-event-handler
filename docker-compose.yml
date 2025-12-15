@@ -1,0 +1,93 @@
+# yaml-language-server: $schema=https://json.schemastore.org/compose-spec.json
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: hibarr-crm-event-handler-redis
+    restart: unless-stopped
+    # No ports exposed - only accessible within Docker network
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  mongodb:
+    image: mongo:7
+    container_name: hibarr-crm-event-handler-mongodb
+    restart: unless-stopped
+    # No ports exposed - only accessible within Docker network
+    environment:
+      - MONGO_INITDB_DATABASE=hibarr_crm_event_handler
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hibarr-crm-event-handler:latest
+    container_name: hibarr-crm-event-handler-api
+    env_file:
+      - .env
+    environment:
+      - PORT=3232
+      - REDIS_URI=redis://redis:6379
+      - DB_URI=mongodb://mongodb:27017/hibarr_crm_event_handler
+    ports:
+      - "3232:3232"
+    volumes:
+      - shared-logs:/app/logs
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3232/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hibarr-crm-event-handler:latest
+    container_name: hibarr-crm-event-handler-worker
+    env_file:
+      - .env
+    environment:
+      - REDIS_URI=redis://redis:6379
+      - DB_URI=mongodb://mongodb:27017/hibarr_crm_event_handler
+    command: ["node", "dist/workers/crm-webhook.worker.js"]
+    volumes:
+      - shared-logs:/app/logs
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+
+# Shared volumes
+volumes:
+  redis-data:
+    driver: local
+  mongodb-data:
+    driver: local
+  mongodb-config:
+    driver: local
+  shared-logs:
+    driver: local
