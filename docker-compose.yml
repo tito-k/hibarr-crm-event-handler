@@ -35,7 +35,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: hibarr-crm-event-handler:latest
+    image: hibarr-crm-event-handler
     container_name: hibarr-crm-event-handler-api
     env_file:
       - .env
