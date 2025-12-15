@@ -22,15 +22,13 @@ class WebhookReceiptService
 
   private providerInstances: Record<string, IProviderService> = {
     [Provider.CRM]: new CRMProvider(),
-    // [Provider.EXACT_ONLINE]: exactOnlineProvider,
-    // [Provider.WOOCOMMERCE]: woocommerceProvider,
   };
 
   public getProviderInstance(provider: Provider): IProviderService {
     const providerInstance = this.providerInstances[provider];
 
     if (!providerInstance) {
-      throw new BadRequestError(`Invalid provider.`);
+      throw new BadRequestError('Invalid provider.');
     }
 
     return providerInstance;
@@ -66,4 +64,3 @@ class WebhookReceiptService
 }
 
 export default WebhookReceiptService;
-
